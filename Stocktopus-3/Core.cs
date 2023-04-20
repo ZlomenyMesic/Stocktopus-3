@@ -21,7 +21,7 @@ namespace Stocktopus_3 {
                 // toggleable options
                 // ToLower() is called because the option name should not be case sensitive
                 switch (tokens[2].ToLower()) {
-                    case "forceenpassant": forceEnPassant ^= true; Console.WriteLine($"the option forceEnPassant has been set to {forceEnPassant}"); break;
+                    case "forceenpassant": forceEnPassant ^= true; Console.WriteLine($"the option forceEnPassant is now set to {forceEnPassant}"); break;
                     default: Console.WriteLine($"unknown option: {tokens[2]}"); break;
                 }
             } else if (tokens.Length == 5 && tokens[1] == "name" && tokens[3] == "value") {
@@ -30,6 +30,8 @@ namespace Stocktopus_3 {
         }
 
         internal static void SetPosition(string[] tokens) {
+            for (int i = 0; i < 64; i++)
+                board.mailbox[i] = new Piece(PieceType.None, Color.None);
             // position command format:
             //
             // position [fen <fenstring> | startpos ] moves <move1> .... <movei>
