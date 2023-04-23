@@ -18,6 +18,10 @@ namespace Stocktopus_3 {
             Array.Fill(mailbox, new Piece(PieceType.None, Color.None));
         }
 
+        internal static void PerformMove(Board board, Move move) {
+
+        }
+
         internal static void Print(Board board) {
             for (int i = 0; i < 64; i++) {
                 char square = '-';

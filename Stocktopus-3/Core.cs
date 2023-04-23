@@ -17,6 +17,7 @@ namespace Stocktopus_3 {
             // setoption name <id> [value <x>]
             //
             // This is sent to the engine when the user wants to change the internal parameters of the engine.
+
             if (tokens.Length == 3 && tokens[1] == "name") {
                 // toggleable options
                 // ToLower() is called because the option name should not be case sensitive
@@ -44,18 +45,28 @@ namespace Stocktopus_3 {
                 SetPositionFEN(Constants.STARTPOS_FEN);
             } 
             else if (tokens.Length > 7 && tokens[1] == "fen") {
-                // creates a sub-array and then joins the elements into a FEN string. 
-                // the command could look for example like this:
-                //
-                // position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-                //
-                // offset 2 is needed to skip "position fen", and length 6 to fit all tokens
+                //offset 2 is needed to skip "position fen", and length 6 to fit the whole FEN string
 
                 string[] fenArray = new string[6];
                 Array.Copy(tokens, 2, fenArray, 0, 6);
                 SetPositionFEN(string.Join(' ', fenArray));
             } 
             else Console.WriteLine($"invalid token: {tokens[1]}");
+
+            int movesStartIndex = -1;
+            for (int i = 0; i < tokens.Length; i++)
+                if (tokens[i] == "moves") movesStartIndex = i + 1;
+
+            if (movesStartIndex != -1) {
+                for (int i = movesStartIndex; i < tokens.Length; i++) {
+                    if (Move.IsCorrectFormat(tokens[i])) {
+                        Board.PerformMove(board, Move.ToMove(board, tokens[i]));
+                    } else {
+                        Console.WriteLine($"invalid move: {tokens[i]}");
+                        break;
+                    }
+                }
+            }
 
             Board.Print(board);
         }
@@ -80,17 +91,13 @@ namespace Stocktopus_3 {
                     square += tokens[0][i] - '0';
                 }
                 else if (char.IsLetter(tokens[0][i])) {
-                    Color color = char.IsUpper(tokens[0][i]) ? Color.White : Color.Black;
-                    PieceType pieceType;
-                    switch (char.ToLower(tokens[0][i])) {
-                        case 'p': pieceType = PieceType.Pawn; break;
-                        case 'n': pieceType = PieceType.Knight; break;
-                        case 'b': pieceType = PieceType.Bishop; break;
-                        case 'r': pieceType = PieceType.Rook; break;
-                        case 'q': pieceType = PieceType.Queen; break;
-                        case 'k': pieceType = PieceType.King; break;
-                        default: Console.WriteLine($"invalid fen string character: {tokens[0][i]}"); return;
+                    if (!Constants.PIECES.Contains(char.ToLower(tokens[0][i]))) {
+                        Console.WriteLine($"invalid piece: {tokens[0][i]}");
+                        return;
                     }
+
+                    Color color = char.IsUpper(tokens[0][i]) ? Color.White : Color.Black;
+                    PieceType pieceType = (PieceType)(Constants.PIECES.IndexOf(char.ToLower(tokens[0][i])) + 1);
                     board.mailbox[square++] = new Piece(pieceType, color);
                 } 
                 else if (tokens[0][i] != '/') {
@@ -106,7 +113,7 @@ namespace Stocktopus_3 {
             if (tokens[1] == "w") board.sideToMove = Color.White;
             else if (tokens[1] == "b") board.sideToMove = Color.Black;
             else {
-                Console.WriteLine($"invalid side to move {tokens[1]}");
+                Console.WriteLine($"invalid side to move: {tokens[1]}");
                 return;
             }
 
@@ -114,7 +121,21 @@ namespace Stocktopus_3 {
             // If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside),
             // "Q"(White can castle queenside), "k"(Black can castle kingside), and / or "q"(Black can castle queenside).
 
+            board.castlingFlags = 0;
 
+            for (int i = 0; i < tokens[2].Length; i++) {
+                switch (tokens[2][i]) {
+                    case 'K': board.castlingFlags |= 0x01; break;
+                    case 'Q': board.castlingFlags |= 0x02; break;
+                    case 'k': board.castlingFlags |= 0x04; break;
+                    case 'q': board.castlingFlags |= 0x08; break;
+                    default:
+                        if (tokens[2][i] != '-') {
+                            Console.WriteLine($"invalid castling availiability: {tokens[2][i]}");
+                            return;
+                        } else continue;
+                }
+            }
 
             // 4. EN PASSANT TARGET SQUARE
             // This is a square over which a pawn has just passed while moving two squares; it is given in algebraic
@@ -128,14 +149,12 @@ namespace Stocktopus_3 {
             else if (tokens[3].Length == 1 && tokens[3][0] == '-')
                 board.enPassantSquare = 0;
             else {
-                Console.WriteLine($"invalid en passant square {tokens[3]}");
+                Console.WriteLine($"invalid en passant square: {tokens[3]}");
                 return;
             }
 
             // 5. HALFMOVE CLOCK
             // The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
-
-
 
             // 6 FULLMOVE NUMBER
             // The number of the full moves. It starts at 1 and is incremented after Black's move.
