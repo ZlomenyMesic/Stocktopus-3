@@ -45,13 +45,18 @@ namespace Stocktopus_3 {
                 SetPositionFEN(Constants.STARTPOS_FEN);
             } 
             else if (tokens.Length > 7 && tokens[1] == "fen") {
-                //offset 2 is needed to skip "position fen", and length 6 to fit the whole FEN string
+                // offset 2 is needed to skip "position fen", and length 6 to fit the whole FEN string
 
                 string[] fenArray = new string[6];
                 Array.Copy(tokens, 2, fenArray, 0, 6);
                 SetPositionFEN(string.Join(' ', fenArray));
             } 
             else Console.WriteLine($"invalid token: {tokens[1]}");
+
+            // after the token "moves" is a list of moves played from the set position
+            // however, this is optional, the position doesn't need a move list
+            // "position startpos moves e2e4" is the same as
+            // "position fen rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
 
             int movesStartIndex = -1;
             for (int i = 0; i < tokens.Length; i++)
@@ -152,6 +157,8 @@ namespace Stocktopus_3 {
                 Console.WriteLine($"invalid en passant square: {tokens[3]}");
                 return;
             }
+
+            // we don't need the fullmove number, the halfmove number will be done soon
 
             // 5. HALFMOVE CLOCK
             // The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
