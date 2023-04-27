@@ -4,30 +4,21 @@
 //
 
 namespace Stocktopus_3 {
-    static class Core {
+    internal static class Core {
         internal static Board board = new();
         internal static Color engineColor;
         internal static Color playerColor;
 
         internal static bool forceEnPassant = false; // don't ask
 
-        internal static void SetOption(string[] tokens) {
-            // setoption command format:
-            //
-            // setoption name <id> [value <x>]
-            //
-            // This is sent to the engine when the user wants to change the internal parameters of the engine.
+        internal static string BestMove() {
+            Console.WriteLine(board.empty);
 
-            if (tokens.Length == 3 && tokens[1] == "name") {
-                // toggleable options
-                // ToLower() is called because the option name should not be case sensitive
-                switch (tokens[2].ToLower()) {
-                    case "forceenpassant": forceEnPassant ^= true; Console.WriteLine($"the option forceEnPassant is now set to {forceEnPassant}"); break;
-                    default: Console.WriteLine($"unknown option: {tokens[2]}"); break;
-                }
-            } else if (tokens.Length == 5 && tokens[1] == "name" && tokens[3] == "value") {
-                // options that need a value
-            } else Console.WriteLine("invalid setoption format");
+            Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
+
+            Move chosen = possibleMoves[new Random().Next(0, possibleMoves.Length)];
+
+            return $"bestmove {Move.ToString(chosen)}";
         }
 
         internal static void SetPosition(string[] tokens) {
@@ -42,6 +33,8 @@ namespace Stocktopus_3 {
             // stored using a form of the Long Algebraic Notation (LAN).
 
             if (tokens.Length > 1 && tokens[1] == "startpos") {
+                engineColor = Color.White;
+                playerColor = Color.Black;
                 SetPositionFEN(Constants.STARTPOS_FEN);
             } 
             else if (tokens.Length > 7 && tokens[1] == "fen") {
@@ -65,6 +58,7 @@ namespace Stocktopus_3 {
             if (movesStartIndex != -1) {
                 for (int i = movesStartIndex; i < tokens.Length; i++) {
                     if (Move.IsCorrectFormat(tokens[i])) {
+                        (engineColor, playerColor) = (playerColor, engineColor);
                         Board.PerformMove(board, Move.ToMove(board, tokens[i]));
                     } else {
                         Console.WriteLine($"invalid move: {tokens[i]}");
@@ -73,6 +67,7 @@ namespace Stocktopus_3 {
                 }
             }
 
+            Board.UpdateBitboards(board);
             Board.Print(board);
         }
 
@@ -121,6 +116,8 @@ namespace Stocktopus_3 {
                 Console.WriteLine($"invalid side to move: {tokens[1]}");
                 return;
             }
+            engineColor = board.sideToMove;
+            playerColor = board.sideToMove == Color.White ? Color.Black : Color.White;
 
             // 3. CASTLING RIGHTS
             // If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside),
@@ -165,6 +162,25 @@ namespace Stocktopus_3 {
 
             // 6 FULLMOVE NUMBER
             // The number of the full moves. It starts at 1 and is incremented after Black's move.
+        }
+
+        internal static void SetOption(string[] tokens) {
+            // setoption command format:
+            //
+            // setoption name <id> [value <x>]
+            //
+            // This is sent to the engine when the user wants to change the internal parameters of the engine.
+
+            if (tokens.Length == 3 && tokens[1] == "name") {
+                // toggleable options
+                // ToLower() is called because the option name should not be case sensitive
+                switch (tokens[2].ToLower()) {
+                    case "forceenpassant": forceEnPassant ^= true; Console.WriteLine($"the option forceEnPassant is now set to {forceEnPassant}"); break;
+                    default: Console.WriteLine($"unknown option: {tokens[2]}"); break;
+                }
+            } else if (tokens.Length == 5 && tokens[1] == "name" && tokens[3] == "value") {
+                // options that need a value
+            } else Console.WriteLine("invalid setoption format");
         }
     }
 }

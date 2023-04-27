@@ -58,12 +58,19 @@ namespace Stocktopus_3 {
                 board.empty ^= enPassantBB;
             }
 
-            if (move.promotion == PieceType.King) {
+            else if (move.promotion == PieceType.King) {
                 // castling
                 if (move.end == 2) PerformMove(board, new Move(0, 3, PieceType.Rook, 0, 0));
                 else if (move.end == 6) PerformMove(board, new Move(7, 5, PieceType.Rook, 0, 0));
                 else if (move.end == 58) PerformMove(board, new Move(56, 59, PieceType.Rook, 0, 0));
                 else if (move.end == 62) PerformMove(board, new Move(63, 61, PieceType.Rook, 0, 0));
+            }
+
+            else if (move.promotion != PieceType.None) {
+                // promotions
+                board.mailbox[move.end].pieceType = move.promotion;
+                board.bitboards[(int)color, 0] ^= Constants.SquareMask[move.end];
+                board.bitboards[(int)color, (int)move.promotion - 1] ^= Constants.SquareMask[move.end];
             }
         }
 
@@ -84,7 +91,7 @@ namespace Stocktopus_3 {
                 }
             }
             // update empty squares
-            board.empty = board.occupied[0] | board.occupied[1];
+            board.empty = ~board.occupied[0] | ~board.occupied[1];
         }
 
         internal static void Print(Board board) {
