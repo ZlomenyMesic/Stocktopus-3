@@ -12,8 +12,6 @@ namespace Stocktopus_3 {
         internal static bool forceEnPassant = false; // don't ask
 
         internal static string BestMove() {
-            Console.WriteLine(board.empty);
-
             Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
 
             Move chosen = possibleMoves[new Random().Next(0, possibleMoves.Length)];
@@ -66,8 +64,6 @@ namespace Stocktopus_3 {
                     }
                 }
             }
-
-            Board.UpdateBitboards(board);
             Board.Print(board);
         }
 
@@ -98,7 +94,7 @@ namespace Stocktopus_3 {
 
                     Color color = char.IsUpper(tokens[0][i]) ? Color.White : Color.Black;
                     PieceType pieceType = (PieceType)(Constants.PIECES.IndexOf(char.ToLower(tokens[0][i])) + 1);
-                    board.mailbox[square++] = new Piece(pieceType, color);
+                    Board.AddPiece(board, pieceType, color, square++);
                 } 
                 else if (tokens[0][i] != '/') {
                     Console.WriteLine($"invalid fen string character: {tokens[0][i]}");

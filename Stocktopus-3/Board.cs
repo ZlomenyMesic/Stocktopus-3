@@ -3,6 +3,8 @@
 //      by ZlomenyMesic 
 //
 
+using System.Transactions;
+
 namespace Stocktopus_3 {
     internal class Board {
         internal ulong[,] bitboards = new ulong[2, 6];
@@ -20,7 +22,14 @@ namespace Stocktopus_3 {
             Array.Fill(mailbox, new Piece(PieceType.None, Color.None));
         }
 
-        internal static void PerformMove(Board board, Move move) {
+        internal static void AddPiece(Board board, PieceType pieceType, Color color, int position) {
+            board.mailbox[position] = new Piece(pieceType, color);
+            board.bitboards[(int)color, (int)pieceType - 1] |= Constants.SquareMask[position];
+            board.occupied[(int)color] |= Constants.SquareMask[position];
+            board.empty ^= Constants.SquareMask[position];
+        }
+
+        internal static void PerformMove(Board board, Move move, bool updateEmptyBB = true) {
             Color color = board.mailbox[move.start].color;
             Color opposite = color == Color.White ? Color.Black : Color.White;
 
@@ -37,13 +46,14 @@ namespace Stocktopus_3 {
             ulong fromToBB = Constants.SquareMask[move.start] | Constants.SquareMask[move.end];
             board.bitboards[(int)color, (int)move.piece - 1] ^= fromToBB;
             board.occupied[(int)color] ^= fromToBB;
-            board.empty ^= fromToBB;
+            //board.empty |= fromToBB;
 
             if (move.capture != PieceType.None) {
                 // normal captures
                 board.bitboards[(int)opposite, (int)move.capture - 1] ^= Constants.SquareMask[move.end];
                 board.occupied[(int)opposite] ^= Constants.SquareMask[move.end];
-            }
+                board.empty ^= Constants.SquareMask[move.start];
+            } //else board.empty ^= fromToBB;
 
             if (move.promotion == PieceType.Pawn) {
                 // en passant
@@ -55,7 +65,7 @@ namespace Stocktopus_3 {
 
                 board.bitboards[(int)opposite, 0] ^= enPassantBB;
                 board.occupied[(int)opposite] ^= enPassantBB;
-                board.empty ^= enPassantBB;
+                //board.empty ^= enPassantBB;
             }
 
             else if (move.promotion == PieceType.King) {
@@ -72,26 +82,10 @@ namespace Stocktopus_3 {
                 board.bitboards[(int)color, 0] ^= Constants.SquareMask[move.end];
                 board.bitboards[(int)color, (int)move.promotion - 1] ^= Constants.SquareMask[move.end];
             }
-        }
 
-        internal static void UpdateBitboards(Board board) {
-            // this is a really slow way of updating the bitboards, so it's used only when setting a new position.
-            // first clear the bitboards
-            board.occupied[0] = 0;
-            board.occupied[1] = 0;
-            for (int i = 0; i < 6; i++) {
-                board.bitboards[0, i] = 0;
-                board.bitboards[1, i] = 0;
-            }
-            // add pieces from the mailbox
-            for (int i = 0; i < 64; i++) {
-                if (board.mailbox[i].pieceType != PieceType.None) {
-                    board.bitboards[(int)board.mailbox[i].color, (int)board.mailbox[i].pieceType - 1] |= Constants.SquareMask[i];
-                    board.occupied[(int)board.mailbox[i].color] |= Constants.SquareMask[i];
-                }
-            }
-            // update empty squares
             board.empty = ~board.occupied[0] | ~board.occupied[1];
+
+            Console.WriteLine(board.empty);
         }
 
         internal static void Print(Board board) {
