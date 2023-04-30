@@ -14,17 +14,19 @@ namespace Stocktopus_3 {
         internal static string BestMove() {
             Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
 
+            foreach (Move m in possibleMoves) {
+                Console.WriteLine(Move.ToString(m));
+            }
+
             Move chosen = possibleMoves[new Random().Next(0, possibleMoves.Length)];
 
             return $"bestmove {Move.ToString(chosen)}";
         }
 
         internal static void SetPosition(string[] tokens) {
-            for (int i = 0; i < 64; i++)
-                board.mailbox[i] = new Piece(PieceType.None, Color.None);
             // position command format:
             //
-            // position [fen <fenstring> | startpos ] moves <move1> .... <movei>
+            // position [fen <fenstring> | startpos ] moves <move1> .... <moven>
             //
             // The position can either be set to the starting position or using a custom FEN string.
             // After the keyword "moves" is a list of moves played from the position. The moves are
@@ -64,10 +66,12 @@ namespace Stocktopus_3 {
                     }
                 }
             }
-            Board.Print(board);
         }
 
         private static void SetPositionFEN(string fen) {
+            for (int i = 0; i < 64; i++)
+                board.mailbox[i] = new Piece(PieceType.None, Color.None);
+
             // set the current board position using a FEN string (Forsyth-Edwards Notation)
             // the string consists of 6 tokens
 
@@ -94,7 +98,7 @@ namespace Stocktopus_3 {
 
                     Color color = char.IsUpper(tokens[0][i]) ? Color.White : Color.Black;
                     PieceType pieceType = (PieceType)(Constants.PIECES.IndexOf(char.ToLower(tokens[0][i])) + 1);
-                    Board.AddPiece(board, pieceType, color, square++);
+                    board.mailbox[square++] = new Piece(pieceType, color);
                 } 
                 else if (tokens[0][i] != '/') {
                     Console.WriteLine($"invalid fen string character: {tokens[0][i]}");
@@ -158,6 +162,8 @@ namespace Stocktopus_3 {
 
             // 6 FULLMOVE NUMBER
             // The number of the full moves. It starts at 1 and is incremented after Black's move.
+
+            Board.UpdateBitboards(board);
         }
 
         internal static void SetOption(string[] tokens) {

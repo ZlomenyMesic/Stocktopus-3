@@ -5,7 +5,8 @@
 
 namespace Stocktopus_3 {
     internal static class UCI {
-        static void Main(string[] args) {
+        static void Main() {
+            LookupTables.Initialize();
             for (;;) {
                 // Dereference of a possibly null reference.
                 // literally nobody asked

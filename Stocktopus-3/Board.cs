@@ -13,7 +13,7 @@ namespace Stocktopus_3 {
 
         internal Piece[] mailbox = new Piece[64];
 
-        internal byte castlingFlags;
+        internal byte castlingFlags = 0x0F;
         internal byte enPassantSquare;
 
         internal Color sideToMove;
@@ -22,14 +22,7 @@ namespace Stocktopus_3 {
             Array.Fill(mailbox, new Piece(PieceType.None, Color.None));
         }
 
-        internal static void AddPiece(Board board, PieceType pieceType, Color color, int position) {
-            board.mailbox[position] = new Piece(pieceType, color);
-            board.bitboards[(int)color, (int)pieceType - 1] |= Constants.SquareMask[position];
-            board.occupied[(int)color] |= Constants.SquareMask[position];
-            board.empty ^= Constants.SquareMask[position];
-        }
-
-        internal static void PerformMove(Board board, Move move, bool updateEmptyBB = true) {
+        internal static void PerformMove(Board board, Move move) {
             Color color = board.mailbox[move.start].color;
             Color opposite = color == Color.White ? Color.Black : Color.White;
 
@@ -53,7 +46,7 @@ namespace Stocktopus_3 {
                 board.bitboards[(int)opposite, (int)move.capture - 1] ^= Constants.SquareMask[move.end];
                 board.occupied[(int)opposite] ^= Constants.SquareMask[move.end];
                 board.empty ^= Constants.SquareMask[move.start];
-            } //else board.empty ^= fromToBB;
+            } else board.empty ^= fromToBB;
 
             if (move.promotion == PieceType.Pawn) {
                 // en passant
@@ -65,7 +58,7 @@ namespace Stocktopus_3 {
 
                 board.bitboards[(int)opposite, 0] ^= enPassantBB;
                 board.occupied[(int)opposite] ^= enPassantBB;
-                //board.empty ^= enPassantBB;
+                board.empty ^= enPassantBB;
             }
 
             else if (move.promotion == PieceType.King) {
@@ -82,10 +75,83 @@ namespace Stocktopus_3 {
                 board.bitboards[(int)color, 0] ^= Constants.SquareMask[move.end];
                 board.bitboards[(int)color, (int)move.promotion - 1] ^= Constants.SquareMask[move.end];
             }
+        }
 
-            board.empty = ~board.occupied[0] | ~board.occupied[1];
+        internal static void UpdateBitboards(Board board) {
+            // this is a very slow way of updating the bitboards, so it's only used when setting a new position
+            board.empty = 0;
+            board.occupied[0] = 0;
+            board.occupied[1] = 0;
+            for (int i = 0; i < 6; i++) {
+                board.bitboards[0, i] = 0;
+                board.bitboards[1, i] = 0;
+            }
+            for (int i = 0; i < 64; i++) {
+                if (board.mailbox[i].pieceType != PieceType.None) {
+                    board.bitboards[(int)board.mailbox[i].color, (int)board.mailbox[i].pieceType - 1] |= Constants.SquareMask[i];
+                    board.occupied[(int)board.mailbox[i].color] |= Constants.SquareMask[i];
+                }
+            }
+            board.empty = ~(board.occupied[0] | board.occupied[1]);
+        }
 
-            Console.WriteLine(board.empty);
+        internal static bool IsMoveLegal(Board board, Move move) {
+            Board temp = Clone(board);
+            //Print(temp);
+            PerformMove(temp, move);
+            //Print(temp);
+            //Console.WriteLine(IsCheck(temp, board.mailbox[move.start].color));
+            //Console.WriteLine();
+            return !IsCheck(temp, board.mailbox[move.start].color);
+        }
+
+        internal static bool IsCheck(Board board, Color kingColor) {
+            // instead of generating all possible opponent's moves, it's faster to generate moves from the king
+            Move[] moves = new Move[64];
+            int i = 0;
+            int j = 0;
+
+            Movegen.GetKingMoves(board, kingColor, moves, ref i);
+            for (int k = j++; k < i; k++)
+                if (moves[k].capture == PieceType.King || moves[k].capture == PieceType.Queen) return true;
+
+            Movegen.GetPawnMoves(board, kingColor, moves, ref i);
+            for (int k = j++; k < i; k++)
+                if (moves[k].capture == PieceType.Pawn) return true;
+
+            Movegen.GetKnightMoves(board, kingColor, moves, ref i);
+            for (int k = j++; k < i; k++)
+                if (moves[k].capture == PieceType.Knight) return true;
+
+            Movegen.GetRookMoves(board, kingColor, moves, ref i);
+            for (int k = j++; k < i; k++)
+                if (moves[k].capture == PieceType.Rook || moves[k].capture == PieceType.Queen) return true;
+
+            Movegen.GetBishopMoves(board, kingColor, moves, ref i);
+            for (int k = j++; k < i; k++)
+                if (moves[k].capture == PieceType.Bishop || moves[k].capture == PieceType.Queen) return true;
+
+            return false;
+        }
+
+        internal static Board Clone(Board board) {
+            Board temp = new();
+            for (int k = 0; k < 6; k++) {
+                temp.bitboards[0, k] = board.bitboards[0, k];
+                temp.bitboards[1, k] = board.bitboards[1, k];
+            }
+
+            for (int k = 0; k < 64; k++)
+                temp.mailbox[k] = new Piece(board.mailbox[k].pieceType, board.mailbox[k].color);
+
+            temp.empty = board.empty;
+            temp.occupied[0] = board.occupied[0];
+            temp.occupied[1] = board.occupied[1];
+
+            temp.castlingFlags = board.castlingFlags;
+            temp.enPassantSquare = board.enPassantSquare;
+
+            return temp;
         }
 
         internal static void Print(Board board) {
