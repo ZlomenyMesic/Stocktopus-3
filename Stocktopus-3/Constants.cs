@@ -31,11 +31,6 @@ namespace Stocktopus_3 {
         internal const ulong OO_BLACK_MASK = 0x0000000000000060;
         internal const ulong OOO_BLACK_MASK = 0x000000000000000E;
 
-        internal const byte OO_WHITE_FLAG = 0x01;
-        internal const byte OOO_WHITE_FLAG = 0x02;
-        internal const byte OO_BLACK_FLAG = 0x04;
-        internal const byte OOO_BLACK_FLAG = 0x08;
-
         internal const ulong DeBrujinValue = 0x07EDD5E59A4E28C2;
 
         internal static readonly int[] DeBrujinTable =

@@ -119,14 +119,15 @@ namespace Stocktopus_3 {
             // If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside),
             // "Q"(White can castle queenside), "k"(Black can castle kingside), and / or "q"(Black can castle queenside).
 
-            board.castlingFlags = 0;
+            for (int i = 0; i < 4; i++)
+                board.castling[i] = false;
 
             for (int i = 0; i < tokens[2].Length; i++) {
                 switch (tokens[2][i]) {
-                    case 'K': board.castlingFlags |= Constants.OO_WHITE_FLAG; break;
-                    case 'Q': board.castlingFlags |= Constants.OOO_WHITE_FLAG; break;
-                    case 'k': board.castlingFlags |= Constants.OO_BLACK_FLAG; break;
-                    case 'q': board.castlingFlags |= Constants.OOO_BLACK_FLAG; break;
+                    case 'K': board.castling[0] = true; break;
+                    case 'Q': board.castling[1] = true; break;
+                    case 'k': board.castling[2] = true; break;
+                    case 'q': board.castling[3] = true; break;
                     default:
                         if (tokens[2][i] != '-') {
                             Console.WriteLine($"invalid castling availiability: {tokens[2][i]}");

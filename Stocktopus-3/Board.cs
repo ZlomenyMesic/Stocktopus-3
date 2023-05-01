@@ -13,7 +13,9 @@ namespace Stocktopus_3 {
 
         internal Piece[] mailbox = new Piece[64];
 
-        internal byte castlingFlags = 0x0F;
+        // K, Q, k, q
+        internal bool[] castling = new bool[] { true, true, true, true };
+
         internal byte enPassantSquare;
 
         internal Color sideToMove;
@@ -38,16 +40,8 @@ namespace Stocktopus_3 {
 
             ulong fromToBB = Constants.SquareMask[move.start] | Constants.SquareMask[move.end];
 
-
-
-            // position startpos moves g2g3 c7c5 f2f3 g7g5 h2h3 g8f6 g3g4 f8h6 b1a3 f6d5 a3b1 d8a5 e2e3 e8d8 e3e4
-            board.bitboards[(int)color, (int)move.piece - 1] ^= fromToBB; // FIXME
-
-
-
-
+            board.bitboards[(int)color, (int)move.piece - 1] ^= fromToBB;
             board.occupied[(int)color] ^= fromToBB;
-            //board.empty |= fromToBB;
 
             if (move.capture != PieceType.None) {
                 // normal captures
@@ -82,6 +76,19 @@ namespace Stocktopus_3 {
                 board.mailbox[move.end].pieceType = move.promotion;
                 board.bitboards[(int)color, 0] ^= Constants.SquareMask[move.end];
                 board.bitboards[(int)color, (int)move.promotion - 1] ^= Constants.SquareMask[move.end];
+            }
+
+            if (move.start == 0 || move.end == 0) board.castling[3] = false;
+            else if (move.start == 7 || move.end == 7) board.castling[2] = false;
+            else if (move.start == 56 || move.end == 56) board.castling[1] = false;
+            else if (move.start == 63 || move.end == 63) board.castling[0] = false;
+
+            if (move.start == 4) {
+                board.castling[2] = false;
+                board.castling[3] = false;
+            } else if (move.start == 60) {
+                board.castling[0] = false;
+                board.castling[1] = false;
             }
         }
 
@@ -147,11 +154,13 @@ namespace Stocktopus_3 {
             for (int k = 0; k < 64; k++)
                 temp.mailbox[k] = new Piece(board.mailbox[k].pieceType, board.mailbox[k].color);
 
+            for (int i = 0; i < 4; i++)
+                temp.castling[i] = board.castling[i];
+
             temp.empty = board.empty;
             temp.occupied[0] = board.occupied[0];
             temp.occupied[1] = board.occupied[1];
 
-            temp.castlingFlags = board.castlingFlags;
             temp.enPassantSquare = board.enPassantSquare;
 
             return temp;
