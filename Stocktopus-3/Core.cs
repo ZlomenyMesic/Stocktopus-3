@@ -14,13 +14,9 @@ namespace Stocktopus_3 {
         internal static string BestMove() {
             Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
 
-            foreach (Move m in possibleMoves) {
-                Console.WriteLine(Move.ToString(m));
-            }
+            Move the_chosen_one = possibleMoves[new Random().Next(0, possibleMoves.Length)];
 
-            Move chosen = possibleMoves[new Random().Next(0, possibleMoves.Length)];
-
-            return $"bestmove {Move.ToString(chosen)}";
+            return $"bestmove {Move.ToString(the_chosen_one)}";
         }
 
         internal static void SetPosition(string[] tokens) {
@@ -127,10 +123,10 @@ namespace Stocktopus_3 {
 
             for (int i = 0; i < tokens[2].Length; i++) {
                 switch (tokens[2][i]) {
-                    case 'K': board.castlingFlags |= 0x01; break;
-                    case 'Q': board.castlingFlags |= 0x02; break;
-                    case 'k': board.castlingFlags |= 0x04; break;
-                    case 'q': board.castlingFlags |= 0x08; break;
+                    case 'K': board.castlingFlags |= Constants.OO_WHITE_FLAG; break;
+                    case 'Q': board.castlingFlags |= Constants.OOO_WHITE_FLAG; break;
+                    case 'k': board.castlingFlags |= Constants.OO_BLACK_FLAG; break;
+                    case 'q': board.castlingFlags |= Constants.OOO_BLACK_FLAG; break;
                     default:
                         if (tokens[2][i] != '-') {
                             Console.WriteLine($"invalid castling availiability: {tokens[2][i]}");

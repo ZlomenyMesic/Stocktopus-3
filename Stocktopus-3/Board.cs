@@ -37,7 +37,15 @@ namespace Stocktopus_3 {
             else board.enPassantSquare = 0;
 
             ulong fromToBB = Constants.SquareMask[move.start] | Constants.SquareMask[move.end];
-            board.bitboards[(int)color, (int)move.piece - 1] ^= fromToBB;
+
+
+
+            // position startpos moves g2g3 c7c5 f2f3 g7g5 h2h3 g8f6 g3g4 f8h6 b1a3 f6d5 a3b1 d8a5 e2e3 e8d8 e3e4
+            board.bitboards[(int)color, (int)move.piece - 1] ^= fromToBB; // FIXME
+
+
+
+
             board.occupied[(int)color] ^= fromToBB;
             //board.empty |= fromToBB;
 
@@ -97,38 +105,33 @@ namespace Stocktopus_3 {
 
         internal static bool IsMoveLegal(Board board, Move move) {
             Board temp = Clone(board);
-            //Print(temp);
             PerformMove(temp, move);
-            //Print(temp);
-            //Console.WriteLine(IsCheck(temp, board.mailbox[move.start].color));
-            //Console.WriteLine();
-            return !IsCheck(temp, board.mailbox[move.start].color);
+            return !IsCheck(temp, temp.mailbox[move.end].color);
         }
 
         internal static bool IsCheck(Board board, Color kingColor) {
             // instead of generating all possible opponent's moves, it's faster to generate moves from the king
             Move[] moves = new Move[64];
-            int i = 0;
-            int j = 0;
+            int i = 0, j = 0;
 
             Movegen.GetKingMoves(board, kingColor, moves, ref i);
-            for (int k = j++; k < i; k++)
+            for (int k = j; k < i; k++, j++)
                 if (moves[k].capture == PieceType.King || moves[k].capture == PieceType.Queen) return true;
 
-            Movegen.GetPawnMoves(board, kingColor, moves, ref i);
-            for (int k = j++; k < i; k++)
+            Movegen.GetPawnMoves(board, kingColor, moves, ref i, true);
+            for (int k = j; k < i; k++, j++)
                 if (moves[k].capture == PieceType.Pawn) return true;
 
-            Movegen.GetKnightMoves(board, kingColor, moves, ref i);
-            for (int k = j++; k < i; k++)
+            Movegen.GetKnightMoves(board, kingColor, moves, ref i, true);
+            for (int k = j; k < i; k++, j++)
                 if (moves[k].capture == PieceType.Knight) return true;
 
-            Movegen.GetRookMoves(board, kingColor, moves, ref i);
-            for (int k = j++; k < i; k++)
+            Movegen.GetRookMoves(board, kingColor, moves, ref i, true);
+            for (int k = j; k < i; k++, j++)
                 if (moves[k].capture == PieceType.Rook || moves[k].capture == PieceType.Queen) return true;
 
-            Movegen.GetBishopMoves(board, kingColor, moves, ref i);
-            for (int k = j++; k < i; k++)
+            Movegen.GetBishopMoves(board, kingColor, moves, ref i, true);
+            for (int k = j; k < i; k++, j++)
                 if (moves[k].capture == PieceType.Bishop || moves[k].capture == PieceType.Queen) return true;
 
             return false;
