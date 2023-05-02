@@ -4,9 +4,8 @@
 //
 
 namespace Stocktopus_3 {
+    // chess speaks for itself
     internal static class Targets {
-        // chess speaks for itself
-
         private static ulong GetPawnPushes(ulong pawn, Board board, Color color) {
             ulong singleStepPushTargets = color == Color.White
                 ? Compass.North(pawn) & board.empty

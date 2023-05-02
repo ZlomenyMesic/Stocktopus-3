@@ -9,17 +9,27 @@ namespace Stocktopus_3 {
         internal static Color engineColor;
         internal static Color playerColor;
 
+        // some modifiable options - just for fun
         internal static bool forceEnPassant = false; // don't ask
+        internal static bool randomMoves = false; // the engine will play random moves
+        internal static bool worstMoves = false; // the engine will evaluate all moves and choose the worst one
 
         internal static string BestMove() {
+            // this method is called when the engine gets the "go" command
             Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
-
             Move the_chosen_one = possibleMoves[new Random().Next(0, possibleMoves.Length)];
+
+            // inspired by r/AnarchyChess
+            if (forceEnPassant)
+                for (int i = 0; i < possibleMoves.Length; i++)
+                    if (possibleMoves[i].promotion == PieceType.Pawn)
+                        the_chosen_one = possibleMoves[i];
 
             return $"bestmove {Move.ToString(the_chosen_one)}";
         }
 
         internal static void SetPosition(string[] tokens) {
+            // this method is called when the engine gets the "position" command
             // position command format:
             //
             // position [fen <fenstring> | startpos ] moves <move1> .... <moven>
@@ -106,14 +116,16 @@ namespace Stocktopus_3 {
             // 2. ACTIVE COLOR
             // "w" means white to move, "b" means black.
 
-            if (tokens[1] == "w") board.sideToMove = Color.White;
-            else if (tokens[1] == "b") board.sideToMove = Color.Black;
-            else {
+            if (tokens[1] == "w") {
+                engineColor = Color.White;
+                playerColor = Color.Black;
+            } else if (tokens[1] == "b") {
+                engineColor = Color.Black;
+                playerColor = Color.White;
+            } else {
                 Console.WriteLine($"invalid side to move: {tokens[1]}");
                 return;
             }
-            engineColor = board.sideToMove;
-            playerColor = board.sideToMove == Color.White ? Color.Black : Color.White;
 
             // 3. CASTLING RIGHTS
             // If neither side can castle, this is "-". Otherwise, this has one or more letters: "K" (White can castle kingside),
@@ -138,13 +150,13 @@ namespace Stocktopus_3 {
 
             // 4. EN PASSANT TARGET SQUARE
             // This is a square over which a pawn has just passed while moving two squares; it is given in algebraic
-            // notation. If there is no en passant target square, this field uses the character "-".This is recorded
+            // notation. If there is no en passant target square, this field uses the character "-". This is recorded
             // regardless of whether there is a pawn in position to capture en passant. An updated version of the
             // spec has since made it so the target square is only recorded if a legal en passant move is possible but
             // the old version of the standard is the one most commonly used.
 
             if (tokens[3].Length == 2 && char.IsDigit(tokens[3][0]) && char.IsDigit(tokens[3][1]))
-                board.enPassantSquare = byte.Parse(tokens[3]);
+                board.enPassantSquare = (byte)(int.Parse(tokens[3]) + engineColor == Color.White ? 8 : -8);
             else if (tokens[3].Length == 1 && tokens[3][0] == '-')
                 board.enPassantSquare = 0;
             else {
@@ -174,7 +186,9 @@ namespace Stocktopus_3 {
                 // toggleable options
                 // ToLower() is called because the option name should not be case sensitive
                 switch (tokens[2].ToLower()) {
-                    case "forceenpassant": forceEnPassant ^= true; Console.WriteLine($"the option forceEnPassant is now set to {forceEnPassant}"); break;
+                    case "forceenpassant": forceEnPassant ^= true; Console.WriteLine($"the option forceEnPassant is now set to: {forceEnPassant}"); break;
+                    case "randommoves": randomMoves ^= true; Console.WriteLine($"the option randomMoves is now set to: {randomMoves}"); break;
+                    case "worstmoves": worstMoves ^= true; Console.WriteLine($"the option worstMoves is now set to: {worstMoves}"); break;
                     default: Console.WriteLine($"unknown option: {tokens[2]}"); break;
                 }
             } else if (tokens.Length == 5 && tokens[1] == "name" && tokens[3] == "value") {

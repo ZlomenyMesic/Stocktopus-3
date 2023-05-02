@@ -8,8 +8,7 @@ namespace Stocktopus_3 {
         internal int start;
         internal int end;
 
-        // override promotion with PieceType.Pawn for en passant,
-        // or with PieceType.King for castling
+        // override promotion with PieceType.Pawn for en passant or with PieceType.King for castling
 
         internal PieceType piece;
         internal PieceType capture;

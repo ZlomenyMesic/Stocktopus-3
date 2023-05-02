@@ -65,6 +65,14 @@ namespace Stocktopus_3 {
                 start = Bitboard.BitScanForwardReset(ref pawns);
                 targets = Targets.GetPawnTargets(Constants.SquareMask[start], board, color);
 
+                if (kingCheck == false && board.enPassantSquare != 0) {
+                    int difference = ((start - (start % 8)) / 8) - ((board.enPassantSquare - (board.enPassantSquare % 8)) / 8);
+                    if (difference == 0 && start + 1 == board.enPassantSquare)
+                        moves[i++] = new Move(start, start + (color == Color.White ? -7 : 9), PieceType.Pawn, PieceType.None, PieceType.Pawn);
+                    else if (difference == 0 && start - 1 == board.enPassantSquare)
+                        moves[i++] = new Move(start, start + (color == Color.White ? -9 : 7), PieceType.Pawn, PieceType.None, PieceType.Pawn);
+                }
+
                 while (targets != 0) {
                     end = (byte)Bitboard.BitScanForwardReset(ref targets);
 

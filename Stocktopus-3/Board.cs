@@ -18,8 +18,6 @@ namespace Stocktopus_3 {
 
         internal byte enPassantSquare;
 
-        internal Color sideToMove;
-
         internal Board() {
             Array.Fill(mailbox, new Piece(PieceType.None, Color.None));
         }
@@ -35,7 +33,7 @@ namespace Stocktopus_3 {
             // update the en passant square
             if (move.piece == PieceType.Pawn && ((color == Color.White && move.start >= 48 && move.start <= 55 && move.end >= 32 && move.end <= 39) 
                 || (color == Color.Black && move.start <= 15 && move.start >= 8 && move.end >= 24 && move.end <= 31)))
-                board.enPassantSquare = (byte)(move.end + color == Color.White ? 8 : -8);
+                board.enPassantSquare = (byte)move.end;
             else board.enPassantSquare = 0;
 
             ulong fromToBB = Constants.SquareMask[move.start] | Constants.SquareMask[move.end];
@@ -117,7 +115,8 @@ namespace Stocktopus_3 {
         }
 
         internal static bool IsCheck(Board board, Color kingColor) {
-            // instead of generating all possible opponent's moves, it's faster to generate moves from the king
+            // instead of generating all possible opponent's moves and searching if one of them captures the king,
+            // it is faster to "shoot rays" from the king to all sides and searching if there's an attacking piece.
             Move[] moves = new Move[64];
             int i = 0, j = 0;
 

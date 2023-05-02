@@ -13,7 +13,6 @@ namespace Stocktopus_3 {
         // map the set of possible occupancy bitboards into a dense range.
 
         internal static readonly ulong[] KingAttacks = new ulong[64];
-
         internal static readonly ulong[][] RankAttacks = new ulong[64][];
         internal static readonly ulong[][] FileAttacks = new ulong[64][];
         internal static readonly ulong[][] A1H8DiagonalAttacks = new ulong[64][];
@@ -28,6 +27,7 @@ namespace Stocktopus_3 {
         }
 
         private static void InitKingAttacks() {
+            // generate a bitboard with possible king moves for each square
             for (int i = 0; i < 64; i++) {
                 ulong king = Constants.SquareMask[i];
                 ulong attacks = Compass.East(king) | Compass.West(king);
@@ -38,6 +38,7 @@ namespace Stocktopus_3 {
         }
 
         private static void InitRankAttacks() {
+            // generate a bitboard with rank attacks for each square and occupancy
             for (int i = 0; i < 64; i++) {
                 RankAttacks[i] = new ulong[64];
             }
@@ -66,6 +67,7 @@ namespace Stocktopus_3 {
             }
         }
         private static void InitFileAttacks() {
+            // generate a bitboard with file attacks for each square and occupancy
             for (int i = 0; i < 64; i++) {
                 FileAttacks[i] = new ulong[64];
             }
@@ -86,6 +88,7 @@ namespace Stocktopus_3 {
         }
 
         private static void InitA1H8DiagonalAttacks() {
+            // generate a bitboard with diagonal attacks for each square and occupancy
             for (int i = 0; i < 64; i++) {
                 A1H8DiagonalAttacks[i] = new ulong[64];
             }
@@ -120,6 +123,7 @@ namespace Stocktopus_3 {
         }
 
         private static void InitH1A8DiagonalAttacks() {
+            // generate a bitboard with anti-diagonal attacks for each square and occupancy
             for (int i = 0; i < 64; i++) {
                 H1A8DiagonalAttacks[i] = new ulong[64];
             }
