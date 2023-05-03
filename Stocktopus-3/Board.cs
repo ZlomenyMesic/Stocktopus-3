@@ -1,9 +1,7 @@
 ﻿//
 // Stocktopus 3 chess engine
-//      by ZlomenyMesic 
+//      by ZlomenyMesic
 //
-
-using System.Transactions;
 
 namespace Stocktopus_3 {
     internal class Board {
@@ -88,6 +86,18 @@ namespace Stocktopus_3 {
                 board.castling[0] = false;
                 board.castling[1] = false;
             }
+        }
+
+        internal static Board[] GetChildren(Board board, Color color) {
+            Move[] moves = Movegen.GetLegalMoves(board, color);
+            Board[] children = new Board[moves.Length];
+
+            for (int i = 0; i < moves.Length; i++) {
+                children[i] = new Board();
+                PerformMove(children[i], moves[i]);
+            }
+
+            return children;
         }
 
         internal static void UpdateBitboards(Board board) {

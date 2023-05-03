@@ -1,5 +1,7 @@
-﻿using System.Drawing;
-using System;
+﻿//
+// Stocktopus 3 chess engine
+//      by ZlomenyMesic 
+//
 
 namespace Stocktopus_3 {
     internal static class LookupTables {

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//
+// Stocktopus 3 chess engine
+//      by ZlomenyMesic 
+//
 
 namespace Stocktopus_3 {
     internal class Compass {

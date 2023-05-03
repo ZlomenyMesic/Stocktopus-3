@@ -7,6 +7,7 @@ namespace Stocktopus_3 {
     internal static class UCI {
         static void Main() {
             LookupTables.Initialize();
+            Hashing.InitZobrist();
             for (;;) {
                 // Dereference of a possibly null reference.
                 // literally nobody asked
