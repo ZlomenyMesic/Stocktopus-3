@@ -45,6 +45,8 @@ namespace Stocktopus_3 {
             44, 24, 15,  8, 23,  7,  6,  5
         };
 
+        internal static readonly int[] pieceValues = new int[] { 1, 3, 3, 5, 9, 0 };
+
         internal static readonly ulong[] SixBitRankMask = new ulong[]{
             0x000000000000007E, 0x0000000000007E00, 0x00000000007E0000,
             0x000000007E000000, 0x0000007E00000000, 0x00007E0000000000,

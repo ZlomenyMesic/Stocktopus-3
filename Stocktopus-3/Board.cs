@@ -93,7 +93,7 @@ namespace Stocktopus_3 {
             Board[] children = new Board[moves.Length];
 
             for (int i = 0; i < moves.Length; i++) {
-                children[i] = new Board();
+                children[i] = Clone(board);
                 PerformMove(children[i], moves[i]);
             }
 

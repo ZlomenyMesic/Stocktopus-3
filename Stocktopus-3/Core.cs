@@ -16,16 +16,22 @@ namespace Stocktopus_3 {
 
         internal static string BestMove() {
             // this method is called when the engine gets the "go" command
-            Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
-            Move the_chosen_one = possibleMoves[new Random().Next(0, possibleMoves.Length)];
+            //Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
+            //Move the_chosen_one = possibleMoves[new Random().Next(0, possibleMoves.Length)];
 
             // inspired by r/AnarchyChess
-            if (forceEnPassant)
-                for (int i = 0; i < possibleMoves.Length; i++)
-                    if (possibleMoves[i].promotion == PieceType.Pawn)
-                        the_chosen_one = possibleMoves[i];
+            //if (forceEnPassant)
+            //    for (int i = 0; i < possibleMoves.Length; i++)
+            //        if (possibleMoves[i].promotion == PieceType.Pawn)
+            //            the_chosen_one = possibleMoves[i];
 
-            return $"bestmove {Move.ToString(the_chosen_one)}";
+            Move bestmove = Search.SearchBestMove(board);
+
+            Console.WriteLine($"nodes: {Search.nodes}\ntranspositions: {Search.transpositions}");
+            Search.nodes = 0;
+            Search.transpositions = 0;
+
+            return $"bestmove {Move.ToString(bestmove)}";
         }
 
         internal static void SetPosition(string[] tokens) {
