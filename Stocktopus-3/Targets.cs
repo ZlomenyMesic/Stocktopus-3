@@ -35,15 +35,8 @@ namespace Stocktopus_3 {
         }
 
         internal static ulong GetKnightTargets(ulong knight, Board board, Color color) {
-            ulong east = Compass.East(knight);
-            ulong west = Compass.West(knight);
-            ulong targets = ((east | west) << 16) | ((east | west) >> 16);
-
-            east = Compass.East(east);
-            west = Compass.West(west);
-            targets |= Compass.South(east | west) | Compass.North(east | west);
-
-            return targets & (board.occupied[color == Color.White ? 1 : 0] | board.empty);
+            int square = Bitboard.BitScanForward(knight);
+            return LookupTables.KnightAttacks[square] & (board.occupied[color == Color.White ? 1 : 0] | board.empty);
         }
 
         internal static ulong GetBishopTargets(ulong bishop, Board board, Color color) {

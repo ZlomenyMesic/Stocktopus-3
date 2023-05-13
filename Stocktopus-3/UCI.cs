@@ -1,6 +1,6 @@
 ﻿//
 // Stocktopus 3 chess engine
-//      by ZlomenyMesic 
+//      by ZlomenyMesic
 //
 
 namespace Stocktopus_3 {
@@ -8,6 +8,7 @@ namespace Stocktopus_3 {
         static void Main() {
             LookupTables.Initialize();
             Hashing.InitZobrist();
+            Openings.Extract();
             for (;;) {
                 // Dereference of a possibly null reference.
                 // literally nobody asked

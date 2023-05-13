@@ -20,7 +20,7 @@ namespace Stocktopus_3 {
                 if (board.mailbox[i].pieceType != PieceType.None)
                     hash ^= zobrist[i, (int)board.mailbox[i].pieceType + (board.mailbox[i].color == Color.White ? -1 : 5)];
 
-            return hash ^ (ulong)board.castling.GetHashCode() ^ (ulong)board.enPassantSquare;
+            return hash ^ board.enPassantSquare;
         }
 
         private static ulong RandomUInt64() {

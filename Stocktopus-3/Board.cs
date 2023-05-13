@@ -14,13 +14,23 @@ namespace Stocktopus_3 {
         // K, Q, k, q
         internal bool[] castling = new bool[] { true, true, true, true };
 
+        internal bool hasWhiteCastled = false;
+        internal bool hasBlackCastled = false;
+
         internal byte enPassantSquare;
+
+        internal byte numberOfPieces;
+
+        internal Move lastMove = new(0, 0, 0, 0, 0);
 
         internal Board() {
             Array.Fill(mailbox, new Piece(PieceType.None, Color.None));
+            numberOfPieces = 32;
         }
 
         internal static void PerformMove(Board board, Move move) {
+            board.lastMove = move;
+
             Color color = board.mailbox[move.start].color;
             Color opposite = color == Color.White ? Color.Black : Color.White;
 
@@ -44,6 +54,7 @@ namespace Stocktopus_3 {
                 board.bitboards[(int)opposite, (int)move.capture - 1] ^= Constants.SquareMask[move.end];
                 board.occupied[(int)opposite] ^= Constants.SquareMask[move.end];
                 board.empty ^= Constants.SquareMask[move.start];
+                board.numberOfPieces--;
             } else board.empty ^= fromToBB;
 
             if (move.promotion == PieceType.Pawn) {
@@ -57,6 +68,7 @@ namespace Stocktopus_3 {
                 board.bitboards[(int)opposite, 0] ^= enPassantBB;
                 board.occupied[(int)opposite] ^= enPassantBB;
                 board.empty ^= enPassantBB;
+                board.numberOfPieces--;
             }
 
             else if (move.promotion == PieceType.King) {
@@ -65,6 +77,9 @@ namespace Stocktopus_3 {
                 else if (move.end == 6) PerformMove(board, new Move(7, 5, PieceType.Rook, 0, 0));
                 else if (move.end == 58) PerformMove(board, new Move(56, 59, PieceType.Rook, 0, 0));
                 else if (move.end == 62) PerformMove(board, new Move(63, 61, PieceType.Rook, 0, 0));
+
+                if (color == Color.White) board.hasWhiteCastled = true;
+                else board.hasBlackCastled = true;
             }
 
             else if (move.promotion != PieceType.None) {
@@ -89,15 +104,17 @@ namespace Stocktopus_3 {
         }
 
         internal static Board[] GetChildren(Board board, Color color) {
-            Move[] moves = Movegen.GetLegalMoves(board, color);
-            Board[] children = new Board[moves.Length];
+            Move[] legal = Movegen.GetLegalMoves(board, color, true);
+            Board[] children = new Board[legal.Length];
 
-            for (int i = 0; i < moves.Length; i++) {
+            for (int i = 0; i < legal.Length; i++) {
                 children[i] = Clone(board);
-                PerformMove(children[i], moves[i]);
+                PerformMove(children[i], legal[i]);
             }
 
-            return children;
+            // sort the possible boards based on a very basic evaluation to speed up the search
+            Board[] sorted = Evaluation.SortBoardChildren(children, color);
+            return sorted;
         }
 
         internal static void UpdateBitboards(Board board) {
@@ -120,8 +137,20 @@ namespace Stocktopus_3 {
 
         internal static bool IsMoveLegal(Board board, Move move) {
             Board temp = Clone(board);
-            PerformMove(temp, move);
-            return !IsCheck(temp, temp.mailbox[move.end].color);
+            bool isLegal = true;
+
+            if (move.promotion == PieceType.King) {
+                if (IsCheck(board, board.mailbox[move.start].color)) isLegal = false;
+                if (move.end == 2 && !IsMoveLegal(temp, new Move(4, 3, PieceType.King, 0, 0))) isLegal = false;
+                else if (move.end == 6 && !IsMoveLegal(temp, new Move(4, 5, PieceType.King, 0, 0))) isLegal = false;
+                else if (move.end == 58 && !IsMoveLegal(temp, new Move(60, 59, PieceType.King, 0, 0))) isLegal = false;
+                else if (move.end == 62 && !IsMoveLegal(temp, new Move(60, 61, PieceType.King, 0, 0))) isLegal = false;
+            }
+
+            if (board.mailbox[move.start].pieceType != PieceType.None) PerformMove(temp, move);
+            else isLegal = false;
+
+            return isLegal && !IsCheck(temp, board.mailbox[move.start].color);
         }
 
         internal static bool IsCheck(Board board, Color kingColor) {
@@ -166,13 +195,30 @@ namespace Stocktopus_3 {
             for (int i = 0; i < 4; i++)
                 temp.castling[i] = board.castling[i];
 
+            temp.hasWhiteCastled = board.hasWhiteCastled;
+            temp.hasBlackCastled = board.hasBlackCastled;
+
             temp.empty = board.empty;
             temp.occupied[0] = board.occupied[0];
             temp.occupied[1] = board.occupied[1];
 
             temp.enPassantSquare = board.enPassantSquare;
 
+            temp.numberOfPieces = board.numberOfPieces;
+
             return temp;
+        }
+
+        internal static string ConvertToBookFormat(Board board) {
+            System.Text.StringBuilder sb = new();
+            for (int i = 0; i < 64; i++) {
+                char square = board.mailbox[i].pieceType != PieceType.None
+                    ? Constants.PIECES[(int)board.mailbox[i].pieceType - 1] : '-';
+
+                sb.Append($"{(board.mailbox[i].color == Color.Black ? square : char.ToUpper(square))}");
+            }
+            sb.Append(Core.engineColor == Color.White ? 'w' : 'b');
+            return sb.ToString();
         }
 
         internal static void Print(Board board) {

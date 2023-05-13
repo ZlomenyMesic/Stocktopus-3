@@ -5,23 +5,23 @@
 
 namespace Stocktopus_3 {
     internal static class Movegen {
-        internal static void GetPseudoLegalMoves(Board board, Color color, Move[] moves, ref int i) {
+        internal static void GetPseudoLegalMoves(Board board, Color color, Move[] moves, ref int i, bool noCastling = false) {
             GetPawnMoves(board, color, moves, ref i);
             GetKnightMoves(board, color, moves, ref i);
             GetBishopMoves(board, color, moves, ref i);
             GetRookMoves(board, color, moves, ref i);
             GetQueenMoves(board, color, moves, ref i);
             GetKingMoves(board, color, moves, ref i);
-            GetCastlingMoves(board, color, moves, ref i);
+            if (!noCastling) GetCastlingMoves(board, color, moves, ref i);
         }
 
-        internal static Move[] GetLegalMoves(Board board, Color color) {
+        internal static Move[] GetLegalMoves(Board board, Color color, bool noCastling = false) {
             // the theoretical number of possible moves in a single position is higher, but probably unreachable
             Move[] pseudoLegal = new Move[200];
             Move[] legal = new Move[200];
 
             int pseudoLegalCount = 0, legalCount = 0;
-            GetPseudoLegalMoves(board, color, pseudoLegal, ref pseudoLegalCount);
+            GetPseudoLegalMoves(board, color, pseudoLegal, ref pseudoLegalCount, noCastling);
 
             // legality check
             for (int i = 0; i < pseudoLegalCount; i++) {

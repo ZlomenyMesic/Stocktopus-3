@@ -15,27 +15,35 @@ namespace Stocktopus_3 {
         internal static bool worstMoves = false; // the engine will evaluate all moves and choose the worst one
 
         internal static string BestMove() {
-            // this method is called when the engine gets the "go" command
-            //Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
-            //Move the_chosen_one = possibleMoves[new Random().Next(0, possibleMoves.Length)];
+            // this method is called when the engine receives the "go" command
+
+            Transpositions.Clear();
+
+            if (!randomMoves && !forceEnPassant && !worstMoves && Openings.CheckForBookMove(out string book)) return $"book move\nbestmove {book}";
+
+            Move bestmove;
+            if (randomMoves) {
+                Move[] legal = Movegen.GetLegalMoves(board, engineColor);
+                bestmove = legal[new Random().Next(0, legal.Length)];
+            } else bestmove = TestSearch.GetIterativeSearchBestmove(board, TestSearch.depth);
 
             // inspired by r/AnarchyChess
-            //if (forceEnPassant)
-            //    for (int i = 0; i < possibleMoves.Length; i++)
-            //        if (possibleMoves[i].promotion == PieceType.Pawn)
-            //            the_chosen_one = possibleMoves[i];
+            if (forceEnPassant) {
+                Move[] possibleMoves = Movegen.GetLegalMoves(board, engineColor);
+                for (int i = 0; i < possibleMoves.Length; i++)
+                    if (possibleMoves[i].promotion == PieceType.Pawn)
+                        bestmove = possibleMoves[i];
+            }
 
-            Move bestmove = Search.SearchBestMove(board);
-
-            Console.WriteLine($"nodes: {Search.nodes}\ntranspositions: {Search.transpositions}");
-            Search.nodes = 0;
-            Search.transpositions = 0;
+            Console.WriteLine($"total nodes: {TestSearch.nodes}\ntranspositions: {TestSearch.transpositions}");
+            TestSearch.nodes = 0;
+            TestSearch.transpositions = 0;
 
             return $"bestmove {Move.ToString(bestmove)}";
         }
 
         internal static void SetPosition(string[] tokens) {
-            // this method is called when the engine gets the "position" command
+            // this method is called when the engine receives the "position" command
             // position command format:
             //
             // position [fen <fenstring> | startpos ] moves <move1> .... <moven>
@@ -78,6 +86,8 @@ namespace Stocktopus_3 {
                     }
                 }
             }
+
+            Console.WriteLine(Board.ConvertToBookFormat(board));
         }
 
         private static void SetPositionFEN(string fen) {

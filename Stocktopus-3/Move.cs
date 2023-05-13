@@ -23,6 +23,40 @@ namespace Stocktopus_3 {
             this.promotion = promotion;
         }
 
+        internal static bool IsHopeless(Move move) {
+            if (move.capture != PieceType.None) return false;
+            if (move.promotion != PieceType.None && move.promotion != PieceType.King) return false;
+            return true;
+        }
+
+        internal static bool GivesCheck(Board board, Move move) {
+            Color color = board.mailbox[move.start].color;
+            Board temp = Board.Clone(board);
+            Board.PerformMove(temp, move);
+            return (Board.IsCheck(temp, color == Color.White ? Color.Black : Color.White));
+        }
+
+        internal static Move[] SortMoves((Move, int)[] eval) {
+            Move[] sorted = new Move[eval.Length];
+
+            bool wereSortsMade = true;
+            while (wereSortsMade) {
+                wereSortsMade = false;
+                for (int i = 0; i < eval.Length - 1; i++) {
+                    if (eval[i].Item2 < eval[i + 1].Item2) {
+                        (eval[i], eval[i + 1]) = (eval[i + 1], eval[i]);
+                        wereSortsMade = true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < eval.Length; i++) {
+                sorted[i] = eval[i].Item1;
+            }
+
+            return sorted;
+        }
+
         internal static bool IsCorrectFormat(string str) {
             // checks if the move from the user input makes sense
             // caution: don't try to understand this mess
