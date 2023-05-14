@@ -22,8 +22,9 @@ namespace Stocktopus_3 {
                 case "uci": Console.WriteLine(Constants.ENGINE_INFO); break;
                 case "isready": Console.WriteLine("readyok"); break;
                 case "position": Core.SetPosition(tokens); break;
-                case "go": Console.WriteLine(Core.BestMove()); break;
+                case "go": Console.WriteLine(Core.BestMove(tokens)); break;
                 case "setoption": Core.SetOption(tokens); break;
+                case "stop": TestSearch.interrupt = true; break;
                 default: Console.WriteLine($"unknown command: {tokens[0]}"); break;
             }
         }

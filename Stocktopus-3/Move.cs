@@ -57,6 +57,20 @@ namespace Stocktopus_3 {
             return sorted;
         }
 
+        internal static (Move, int)[] CutPossibleMoves((Move, int)[] eval) {
+            bool wereSortsMade = true;
+            while (wereSortsMade) {
+                wereSortsMade = false;
+                for (int i = 0; i < eval.Length - 1; i++) {
+                    if (eval[i].Item2 < eval[i + 1].Item2) {
+                        (eval[i], eval[i + 1]) = (eval[i + 1], eval[i]);
+                        wereSortsMade = true;
+                    }
+                }
+            }
+            return eval.Take(Math.Min(eval.Length, 5)).ToArray();
+        }
+
         internal static bool IsCorrectFormat(string str) {
             // checks if the move from the user input makes sense
             // caution: don't try to understand this mess

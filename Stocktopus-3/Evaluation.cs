@@ -1,6 +1,6 @@
 ﻿//
 // Stocktopus 3 chess engine
-//      by ZlomenyMesic 
+//      by ZlomenyMesic
 //
 
 namespace Stocktopus_3 {

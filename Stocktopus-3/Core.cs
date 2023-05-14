@@ -14,8 +14,10 @@ namespace Stocktopus_3 {
         internal static bool randomMoves = false; // the engine will play random moves
         internal static bool worstMoves = false; // the engine will evaluate all moves and choose the worst one
 
-        internal static string BestMove() {
+        internal static string BestMove(string[] tokens) {
             // this method is called when the engine receives the "go" command
+
+            long time = TimeControl.GetAvailableTime(tokens);
 
             Transpositions.Clear();
 
@@ -25,7 +27,7 @@ namespace Stocktopus_3 {
             if (randomMoves) {
                 Move[] legal = Movegen.GetLegalMoves(board, engineColor);
                 bestmove = legal[new Random().Next(0, legal.Length)];
-            } else bestmove = TestSearch.GetIterativeSearchBestmove(board, TestSearch.depth);
+            } else bestmove = TestSearch.GetIterativeSearchBestmove(board, TestSearch.depth, time);
 
             // inspired by r/AnarchyChess
             if (forceEnPassant) {
