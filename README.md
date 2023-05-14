@@ -10,5 +10,17 @@ A simple UCI chess engine written in C#
 * modifiable openings book
 
 ## Commands
-```uci```
+```uci```   
 This command is used by the GUI to confirm the UCI protocol.
+
+```isready```   
+
+```position```   
+
+```go```   
+
+```stop```   
+
+```setoption```
+
+## Usage
