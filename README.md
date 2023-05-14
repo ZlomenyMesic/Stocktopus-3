@@ -41,9 +41,9 @@ This allows the user to modify the engine's internal options.
 UCI forces the second keyword to be ```name```, so the format is ```setoption name <option>```.
 All options are toggleable, so they switch the values true and false.
 The three available options are:   
-```forceenpassant``` - this forces the engine to play en passant whenever it can.
-```randommoves``` - this makes the engine play random moves.
-```worstmoves``` - this makes the engine evaluate all moves and choose the worst move.
+```forceenpassant``` - this forces the engine to play en passant whenever it can.   
+```randommoves``` - this makes the engine play random moves.   
+```worstmoves``` - this makes the engine evaluate all moves and choose the worst move.   
 
 ## Usage
 To use the engine, download Stocktopus-3.zip. The folder contains an .exe file, a .txt book file and two other important files (do not delete them!). The executable needs all three files to run.   
