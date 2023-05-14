@@ -25,13 +25,13 @@ After the position is an optional list of moves from that position using the ```
 
 ```go```   
 This starts the minimax search for the best move.
-This is a list of all possible parameters:   
-```infinite``` - this starts an infinite search which can be stopped with the stop command.
-```wtime <value>``` - this sets the white player's time in miliseconds. Default is 600000.
-```btime <value>``` - wtime but for the black player. Default is also 600000.
-```winc <value>``` - white's time incrementation after each move in miliseconds. Default is 0.
-```binc <value>``` - winc for the black player.
-```movestogo <value>``` - number of moves to the next time control. Default is 20.
+This is a list of all possible parameters:      
+```infinite``` - this starts an infinite search which can be stopped with the stop command.   
+```wtime <value>``` - this sets the white player's time in miliseconds. Default is 600000.   
+```btime <value>``` - wtime but for the black player. Default is also 600000.   
+```winc <value>``` - white's time incrementation after each move in miliseconds. Default is 0.   
+```binc <value>``` - winc for the black player.   
+```movestogo <value>``` - number of moves to the next time control. Default is 20.   
 
 ```stop```   
 
